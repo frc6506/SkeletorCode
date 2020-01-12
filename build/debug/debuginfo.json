@@ -1,0 +1,9 @@
+[
+  {
+    "artifact": "frcJava (in project 6506-Code-Skeletor-Imported)",
+    "target": "roborio",
+    "debugfile": "frcJava_roborio.debugconfig",
+    "project": "6506-Code-Skeletor-Imported",
+    "language": "java"
+  }
+]
