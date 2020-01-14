@@ -7,13 +7,17 @@
 
 package frc.robot;
 
-import edu.wpi.cscore.UsbCamera;
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.Spark;
+import com.kauailabs.navx.frc.AHRS;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.controller.PIDController;
+
 import edu.wpi.first.wpilibj.TimedRobot;
-// import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.Spark;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -23,33 +27,67 @@ import edu.wpi.first.wpilibj.TimedRobot;
  * project.
  */
 public class Robot extends TimedRobot {
-  // motor definitions
-  Spark leftMotor = new Spark(1);
-  Spark rightMotor = new Spark(0);
-  /*Spark armMotor = new Spark(2);
-  Spark succLeft = new Spark(3);
-  Spark succRight = new Spark(4);*/
-  // drivetrain
-  RobotDrive drive = new RobotDrive(leftMotor, rightMotor);
+  private static final String kDefaultAuto = "Default";
+  private static final String kCustomAuto = "My Auto";
+  private String m_autoSelected;
+  private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
-  // xbox controller
-  Joystick xbox = new Joystick(0);
 
+
+  public AHRS gyro;
+  public Spark leftMotor = new Spark(0);
+  public Spark rightMotor = new Spark(1);
+  public DifferentialDrive robotDrive = new DifferentialDrive(leftMotor, rightMotor);
+  private PIDController pid  = new PIDController(0.4, 0.1, 0.0);
+
+  /**
+   * This function is run when the robot is first started up and should be
+   * used for any initialization code.
+   */
   @Override
   public void robotInit() {
-    // fix inverted drive
-    leftMotor.setInverted(true);  //I kinda liked it backward :)
-    rightMotor.setInverted(true);
-    /*// invert right intake motor for simplicity
-    succRight.setInverted(true);
-    // initialize camera*/
-    UsbCamera cam = CameraServer.getInstance().startAutomaticCapture();
-    cam.setResolution(160, 120);
-    cam.setFPS(30);
+    try {
+      /* Communicate w/navX-MXP via the MXP SPI Bus.                                     */
+      /* Alternatively:  I2C.Port.kMXP, SerialPort.Port.kMXP or SerialPort.Port.kUSB     */
+      /* See http://navx-mxp.kauailabs.com/guidance/selecting-an-interface/ for details. */
+      gyro = new AHRS(SPI.Port.kMXP); 
+    } catch (RuntimeException ex ) {
+        DriverStation.reportError("Error instantiating navX-MXP:  " + ex.getMessage(), true);
+    }
+
+    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
+    m_chooser.addOption("My Auto", kCustomAuto);
+    SmartDashboard.putData("Auto choices", m_chooser);
   }
 
+  /**
+   * This function is called every robot packet, no matter the mode. Use
+   * this for items like diagnostics that you want ran during disabled,
+   * autonomous, teleoperated and test.
+   *
+   * <p>This runs after the mode specific periodic functions, but before
+   * LiveWindow and SmartDashboard integrated updating.
+   */
+  @Override
+  public void robotPeriodic() {
+  }
+
+  /**
+   * This autonomous (along with the chooser code above) shows how to select
+   * between different autonomous modes using the dashboard. The sendable
+   * chooser code works with the Java SmartDashboard. If you prefer the
+   * LabVIEW Dashboard, remove all of the chooser code and uncomment the
+   * getString line to get the auto name from the text box below the Gyro
+   *
+   * <p>You can add additional auto modes by adding additional comparisons to
+   * the switch structure below with additional strings. If using the
+   * SendableChooser make sure to add them to the chooser code above as well.
+   */
   @Override
   public void autonomousInit() {
+    m_autoSelected = m_chooser.getSelected();
+    // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
+    System.out.println("Auto selected: " + m_autoSelected);
   }
 
   /**
@@ -57,24 +95,15 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
-    // drive
-    drive.arcadeDrive(xbox.getRawAxis(1)*.75, xbox.getRawAxis(0)*.65);
-    // deprecated drive, implemented by volunteer
-    // drive.arcadeDrive(xbox, 1, xbox, 0, true);
-    // read joystick input, adjust arm accordingly
-    /*double armPower = xbox.getRawAxis(5);
-    armMotor.set(-armPower * 0.6);
-    // intake
-    if (xbox.getRawButton(5)) {
-      succLeft.set(0.8);
-      succRight.set(0.8);
-    } else if (xbox.getRawButton(6)) {
-      succLeft.set(-0.8);
-      succRight.set(-0.8);
-    } else {
-      succLeft.set(0);
-      succRight.set(0);
-    }*/
+    switch (m_autoSelected) {
+      case kCustomAuto:
+        // Put custom auto code here
+        break;
+      case kDefaultAuto:
+      default:
+        // Put default auto code here
+        break;
+    }
   }
 
   /**
@@ -82,24 +111,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    // drive
-    drive.arcadeDrive(xbox.getRawAxis(1)*.75, xbox.getRawAxis(0)*.65);
-    // deprecated drive, implemented by volunteer
-    // drive.arcadeDrive(xbox, 1, xbox, 0, true);
-    // read joystick input, adjust arm accordingly
-    /*double armPower = xbox.getRawAxis(5);
-    armMotor.set(-armPower * 0.6);*/
-    // intake
-    /*if (xbox.getRawButton(5)) {
-      succLeft.set(1);
-      succRight.set(1);
-    } else if (xbox.getRawButton(6)) {
-      succLeft.set(-1);
-      succRight.set(-1);
-    } else {
-      succLeft.set(0);
-      succRight.set(0);
-    }*/
+    robotDrive.arcadeDrive(0, pid.calculate(gyro.getAngle(), 90));
   }
 
   /**
