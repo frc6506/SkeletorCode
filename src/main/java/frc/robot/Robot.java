@@ -12,6 +12,7 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 // import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
@@ -24,13 +25,14 @@ import edu.wpi.first.wpilibj.TimedRobot;
  */
 public class Robot extends TimedRobot {
   // motor definitions
-  Spark leftMotor = new Spark(1);
-  Spark rightMotor = new Spark(0);
-  /*Spark armMotor = new Spark(2);
-  Spark succLeft = new Spark(3);
-  Spark succRight = new Spark(4);*/
+  Spark leftMotor1 = new Spark(0);
+  Spark leftMotor2 = new Spark(1);
+  Spark rightMotor1 = new Spark(2);
+  Spark rightMotor2 = new Spark(3);
+  SpeedControllerGroup leftMotors = new SpeedControllerGroup(leftMotor1, leftMotor2);
+  SpeedControllerGroup rightMotors = new SpeedControllerGroup(rightMotor1, rightMotor2);
   // drivetrain
-  RobotDrive drive = new RobotDrive(leftMotor, rightMotor);
+  RobotDrive drive = new RobotDrive(leftMotors, rightMotors);
 
   // xbox controller
   Joystick xbox = new Joystick(0);
@@ -38,10 +40,9 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     // fix inverted drive
-    leftMotor.setInverted(true);  //I kinda liked it backward :)
-    rightMotor.setInverted(true);
-    /*// invert right intake motor for simplicity
-    succRight.setInverted(true);
+    /*leftMotors.setInverted(true);  //I kinda liked it backward :) Idon't :( 
+    //rightMotors.setInverted(true);  //The new skeitor is woried conreltyh! (with progmra's oversight)
+    /*/// invert right intake motor for simplicity //i i kinda like the contorl raoted 90 degres */
     // initialize camera*/
     UsbCamera cam = CameraServer.getInstance().startAutomaticCapture();
     cam.setResolution(160, 120);
